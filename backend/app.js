@@ -49,6 +49,10 @@ app.get(/.*/, (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`✅ College Library System running at http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`✅ College Library System running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
