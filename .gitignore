@@ -11,3 +11,6 @@ backend/uploads/
 # Logs
 *.log
 npm-debug.log*
+
+.env
+.env.example
