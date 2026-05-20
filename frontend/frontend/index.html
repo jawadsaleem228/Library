@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>College Library System</title>
+
+  <!-- Frontend styling is kept in a separate CSS file. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Loading screen shown for a smooth first load. -->
+  <div id="loader" class="page-loader">
+    <div class="loader-card">
+      <div class="spinner"></div>
+      <p>Opening College Library...</p>
+    </div>
+  </div>
+
+  <!-- Login / Signup page. Backend APIs handle actual authentication. -->
+  <main id="authPage" class="auth-page hidden">
+    <section class="auth-hero">
+      <span class="hero-badge"> College Library Portal</span>
+      <h1>Simple library system for students and admin staff.</h1>
+      <p>
+        Search books, manage students, issue books, track return dates and calculate late fine in one clean website.
+      </p>
+      <div class="hero-stats">
+        <span>Books Record</span>
+        <span>Issue / Return</span>
+        <span>Due Alerts</span>
+      </div>
+    </section>
+
+    <section class="glass-card auth-card">
+      <div class="auth-tabs">
+        <button class="active" data-auth-tab="login">Login</button>
+        <button data-auth-tab="signup">Signup</button>
+      </div>
+
+      <!-- Login form. JavaScript sends this data to /api/auth/login. -->
+      <form id="loginForm" class="auth-form">
+        <h2>Welcome back</h2>
+        <p class="muted">Login to use the library dashboard.</p>
+        <label>Email</label>
+        <input type="email" name="email" placeholder="admin@library.com" required />
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter password" required />
+        <button class="primary-btn" type="submit">Login</button>
+      </form>
+
+      <!-- Signup form. New accounts become normal users by default. -->
+      <form id="signupForm" class="auth-form hidden">
+        <h2>Create account</h2>
+        <p class="muted">Students can create their library account.</p>
+        <label>Full Name</label>
+        <input name="name" placeholder="Student name" required />
+        <label>Email</label>
+        <input type="email" name="email" placeholder="student@email.com" required />
+        <label>Password</label>
+        <input type="password" name="password" minlength="6" placeholder="Minimum 6 characters" required />
+        <div class="grid-2">
+          <div><label>Phone</label><input name="phone" placeholder="0300-0000000" /></div>
+          <div><label>Department</label><input name="department" placeholder="BS IT" /></div>
+        </div>
+        <button class="primary-btn" type="submit">Create Account</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Main application area after login. -->
+  <main id="appPage" class="app-shell hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">CL</div>
+        <div>
+          <h3>College Library</h3>
+          <p>Management System</p>
+        </div>
+      </div>
+      <nav class="nav-menu">
+        <button class="nav-link active" data-section="dashboard">Dashboard</button>
+        <button class="nav-link" data-section="books">Books</button>
+        <button class="nav-link admin-only" data-section="users">Students / Users</button>
+        <button class="nav-link" data-section="issues">Issue Records</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="themeToggle" class="ghost-btn">Light / Dark</button>
+        <button id="logoutBtn" class="danger-outline">Logout</button>
+      </div>
+    </aside>
+
+    <section class="main-content">
+      <header class="topbar">
+        <button id="menuBtn" class="icon-btn">☰</button>
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">College library overview</p>
+        </div>
+        <div class="user-pill">
+          <span id="roleBadge">user</span>
+          <strong id="currentUserName">User</strong>
+        </div>
+      </header>
+
+      <!-- Dashboard section. -->
+      <section id="dashboardSection" class="content-section active">
+        <div class="stats-grid">
+          <article class="stat-card"><p>Total Books</p><h2 id="totalBooks">0</h2></article>
+          <article class="stat-card"><p>Issued Books</p><h2 id="issuedBooks">0</h2></article>
+          <article class="stat-card"><p>Available Copies</p><h2 id="availableBooks">0</h2></article>
+          <article class="stat-card"><p>Students / Users</p><h2 id="usersCount">0</h2></article>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div><h2>Due & Late Book Alerts</h2><p>Books that need attention.</p></div>
+          </div>
+          <div id="notificationsList" class="notifications-list"></div>
+        </div>
+      </section>
+
+      <!-- Books section. -->
+      <section id="booksSection" class="content-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div><h2>Books</h2><p>Search and manage college library books.</p></div>
+            <button id="addBookBtn" class="primary-btn admin-only">+ Add Book</button>
+          </div>
+          <div class="filters-row">
+            <input id="bookSearch" placeholder="Search by title, author, ISBN..." />
+            <select id="bookStatusFilter"><option value="">All Status</option><option value="available">Available</option><option value="issued">Fully Issued</option></select>
+            <select id="bookCategoryFilter"><option value="">All Categories</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Book</th><th>Author</th><th>Category</th><th>Copies</th><th>Status</th><th class="admin-only">Actions</th></tr></thead>
+              <tbody id="booksTable"></tbody>
+            </table>
+          </div>
+          <div id="booksPagination" class="pagination"></div>
+        </div>
+      </section>
+
+      <!-- Users section -->
+      <section id="usersSection" class="content-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div><h2>Students / Users</h2><p>Manage student and admin accounts.</p></div>
+            <button id="addUserBtn" class="primary-btn">+ Add User</button>
+          </div>
+          <div class="filters-row">
+            <input id="userSearch" placeholder="Search user by name, email, department..." />
+            <select id="userRoleFilter"><option value="">All Roles</option><option value="user">User</option><option value="admin">Admin</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="usersTable"></tbody>
+            </table>
+          </div>
+          <div id="usersPagination" class="pagination"></div>
+        </div>
+      </section>
+
+      <!-- Admin issues/returns books; users view their own records. -->
+      <section id="issuesSection" class="content-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div><h2>Issue Records</h2><p>Track issued, returned and late books.</p></div>
+            <button id="issueBookBtn" class="primary-btn admin-only">+ Issue Book</button>
+          </div>
+          <div class="filters-row">
+            <input id="issueSearch" placeholder="Search book or student..." />
+            <select id="issueStatusFilter"><option value="">All Status</option><option value="issued">Issued</option><option value="late">Late</option><option value="returned">Returned</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Book</th><th>User</th><th>Issue Date</th><th>Due Date</th><th>Status</th><th>Fine</th><th class="admin-only">Action</th></tr></thead>
+              <tbody id="issuesTable"></tbody>
+            </table>
+          </div>
+          <div id="issuesPagination" class="pagination"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header"><h2 id="modalTitle">Modal</h2><button id="modalClose">×</button></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+  <script src="js/app.js"></script>
+</body>
+</html>
