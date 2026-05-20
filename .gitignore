@@ -2,8 +2,8 @@
 node_modules/
 
 # Secret environment file
-backend/.env
-.env
+# backend/.env
+# .env
 
 # Uploaded book cover images
 backend/uploads/

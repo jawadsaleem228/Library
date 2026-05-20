@@ -1,8 +1,3 @@
-// College Library System Backend
-// ------------------------------------------------------------
-// This is the backend entry file. It connects MongoDB, loads
-// Express routes, serves uploaded images, and opens the frontend.
-
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -20,6 +15,10 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (req, res) => {
+  res.send("Library app running");
+});
 
 // Static folders: book covers and frontend website files.
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -43,12 +42,11 @@ app.use('/api', (req, res) => {
   res.status(404).json({ message: 'API route not found' });
 });
 
-// Browser fallback: direct refresh opens the frontend again.
+//direct refresh opens the frontend again.
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Central backend error handler.
 app.use(errorHandler);
 
 app.listen(PORT, () => {
