@@ -9,9 +9,8 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middlewares: allow frontend requests and read JSON/form data.
+// Middlewares
 app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -20,11 +19,11 @@ app.get("/", (req, res) => {
   res.send("Library app running");
 });
 
-// Static folders: book covers and frontend website files.
+// Static folders
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// API routes are separated by feature for clean backend structure.
+// Routes
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/dashboard', require('./src/routes/dashboardRoutes'));
 app.use('/api/books', require('./src/routes/bookRoutes'));
@@ -32,27 +31,26 @@ app.use('/api/users', require('./src/routes/userRoutes'));
 app.use('/api/issues', require('./src/routes/issueRoutes'));
 app.use('/api/notifications', require('./src/routes/notificationRoutes'));
 
-// Health route helps confirm that backend is running.
+// Health route
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, message: 'College Library System API is running' });
+  res.json({
+    ok: true,
+    message: 'College Library System API is running'
+  });
 });
 
-// Unknown API route response.
+// Unknown API route
 app.use('/api', (req, res) => {
-  res.status(404).json({ message: 'API route not found' });
+  res.status(404).json({
+    message: 'API route not found'
+  });
 });
 
-//direct refresh opens the frontend again.
+// Frontend route
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 app.use(errorHandler);
-
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`✅ College Library System running at http://localhost:${PORT}`);
-  });
-}
 
 module.exports = app;
